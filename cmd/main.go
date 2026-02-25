@@ -1,0 +1,55 @@
+package main
+
+import (
+	"context"
+	"log"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "subscription_service/docs"
+
+	"subscription_service/internal/config"
+	"subscription_service/internal/repository"
+	"subscription_service/internal/service"
+	"subscription_service/internal/handler"
+)
+
+func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	dbPool, err := repository.NewPostgres(ctx, cfg.DatabaseDSN())
+	if err != nil {
+		log.Fatalf("Failed to connect to postgres: %v", err)
+	}
+	defer dbPool.Close()
+
+	log.Printf("Connected to DB %s", cfg.DBName)
+
+	r := gin.Default()
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	repo := repository.NewSubscriptionRepo(dbPool)
+	svc := service.NewSubscriptionService(repo)
+	h := handler.NewSubscriptionHandler(svc)
+
+	r.POST("/subscriptions", h.CreateSubscription)
+	r.GET("/subscriptions/:id", h.GetSubscription)
+	r.PUT("/subscriptions/:id", h.UpdateSubscription)
+	r.DELETE("/subscriptions/:id", h.DeleteSubscription)
+	r.GET("/subscriptions", h.ListSubscriptions)
+	r.GET("/subscriptions/sum", h.SumSubscriptions)
+
+	log.Printf("Server started on port %s", cfg.ServerPort)
+	if err := r.Run(":" + cfg.ServerPort); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
+}
