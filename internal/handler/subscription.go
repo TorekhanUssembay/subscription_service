@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"subscription_service/internal/service"
+	"github.com/TorekhanUssembay/subscription_service/internal/service"
 )
 
 type SubscriptionHandler struct {

@@ -8,14 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "subscription_service/docs"
+	_ "github.com/TorekhanUssembay/subscription_service/docs"
 
-	"subscription_service/internal/config"
-	"subscription_service/internal/repository"
-	"subscription_service/internal/service"
-	"subscription_service/internal/handler"
+	"github.com/TorekhanUssembay/subscription_service/internal/config"
+	"github.com/TorekhanUssembay/subscription_service/internal/repository"
+	"github.com/TorekhanUssembay/subscription_service/internal/service"
+	"github.com/TorekhanUssembay/subscription_service/internal/handler"
 )
 
+// @title Subscription Service API
+// @version 1.0
+// @description API for managing subscriptions
+// @host localhost:8080
+// @BasePath /
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
